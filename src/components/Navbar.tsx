@@ -1,146 +1,754 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu, X, ShieldCheck } from "lucide-react";
+
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const location = useLocation();
+
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+
+  /* =========================================
+     SCROLL DETECTION
+     ========================================= */
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
+  /* =========================================
+     CLOSE MOBILE MENU ON ROUTE CHANGE
+     ========================================= */
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  /* =========================================
+     NAVIGATION
+     ========================================= */
+
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Events', href: '/events' },
-    { name: 'Our Team', href: '/team' },
-    { name: 'Contact Us', href: '/contact' },
+    {
+      name: "Home",
+      href: "/",
+    },
+    {
+      name: "Events",
+      href: "/events",
+    },
+    {
+      name: "Our Team",
+      href: "/team",
+    },
+    {
+      name: "Contact Us",
+      href: "/contact",
+    },
   ];
+
+  /* =========================================
+     SIGN OUT
+     ========================================= */
 
   const handleSignOut = async () => {
     const { error } = await signOut();
+
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to sign out',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
       });
     } else {
       toast({
-        title: 'Signed out',
-        description: 'You have been signed out successfully',
+        title: "Signed out",
+        description: "You have been signed out successfully",
       });
     }
   };
 
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 shadow-md bg-slate-900`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 flex">
-            <Link to="/">
-              <img 
-                src="https://bhephgetoquqyffcbxgt.supabase.co/storage/v1/object/public/images/white_ITESA__png-removebg-preview.png" 
-                alt="ITESA Logo" 
-                className="h-6 w-auto" 
-              />
-            </Link>
-          </div>
+  /* =========================================
+     ACTIVE ROUTE
+     ========================================= */
 
-          <div className="hidden md:block">
-            <div className="ml-16 flex items-baseline space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="text-foreground/80 hover:text-primary-glow transition-colors duration-200 text-base font-medium"
-                >
-                  {link.name}
-                </Link>
-              ))}
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return location.pathname === "/";
+    }
+
+    return location.pathname.startsWith(href);
+  };
+
+  return (
+    <nav
+      className={`
+        fixed
+        left-0
+        right-0
+        top-0
+        z-50
+
+        transition-all
+        duration-500
+
+        ${
+          isScrolled
+            ? "border-b border-cyan-400/10 bg-[#030508]/90 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+            : "border-b border-white/[0.04] bg-[#030508]/55 backdrop-blur-md"
+        }
+      `}
+    >
+      {/* =====================================
+          TOP CYAN LINE
+          ===================================== */}
+
+      <div
+        className={`
+          absolute
+          left-0
+          right-0
+          top-0
+          h-px
+
+          bg-cyan-400/50
+
+          transition-opacity
+          duration-500
+
+          ${isScrolled ? "opacity-100" : "opacity-40"}
+        `}
+      />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          className={`
+            flex
+            items-center
+            justify-between
+
+            transition-all
+            duration-500
+
+            ${isScrolled ? "h-16" : "h-20"}
+          `}
+        >
+          {/* =================================
+              LOGO
+              ================================= */}
+
+          <Link
+            to="/"
+            className="
+              group
+              flex
+              items-center
+              gap-3
+            "
+          >
+            <div
+              className="
+                relative
+                flex
+                items-center
+                justify-center
+                shrink-0
+              "
+            >
+              {/* NEW ITESA LOGO */}
+
+              <img
+                src="/images/itesa-logo.png"
+                alt="ITESA Logo"
+                className="
+                  h-10
+                  sm:h-11
+                  md:h-12
+
+                  w-auto
+                  max-w-[180px]
+
+                  object-contain
+
+                  transition-all
+                  duration-300
+
+                  group-hover:drop-shadow-[0_0_16px_rgba(34,211,238,0.45)]
+                "
+              />
+            </div>
+
+            {/* SYSTEM STATUS */}
+
+            <div
+              className="
+                hidden
+
+                border-l
+                border-white/10
+
+                pl-3
+
+                sm:block
+              "
+            >
+              <div
+                className="
+                  font-mono
+                  text-[9px]
+                  uppercase
+                  tracking-[0.18em]
+                  text-white/40
+                "
+              >
+                ITESA // CORE
+              </div>
+
+              <div
+                className="
+                  mt-0.5
+
+                  flex
+                  items-center
+                  gap-1.5
+
+                  font-mono
+                  text-[8px]
+                  uppercase
+                  tracking-wider
+
+                  text-emerald-400/70
+                "
+              >
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+
+                    rounded-full
+
+                    bg-emerald-400
+
+                    shadow-[0_0_7px_rgba(52,211,153,0.8)]
+                  "
+                />
+
+                SYSTEM ONLINE
+              </div>
+            </div>
+          </Link>
+
+          {/* =================================
+              DESKTOP NAVIGATION
+              ================================= */}
+
+          <div className="hidden md:flex md:items-center">
+            <div
+              className="
+                flex
+                items-center
+                gap-1
+
+                rounded-lg
+
+                border
+                border-white/[0.06]
+
+                bg-white/[0.02]
+
+                p-1
+              "
+            >
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className={`
+                      group
+                      relative
+
+                      rounded-md
+
+                      px-4
+                      py-2.5
+
+                      font-mono
+                      text-[10px]
+                      uppercase
+                      tracking-[0.12em]
+
+                      transition-all
+                      duration-300
+
+                      ${
+                        active
+                          ? "bg-cyan-400/[0.08] text-cyan-300"
+                          : "text-white/45 hover:bg-white/[0.04] hover:text-white/90"
+                      }
+                    `}
+                  >
+                    {link.name}
+
+                    {/* ACTIVE INDICATOR */}
+
+                    <span
+                      className={`
+                        absolute
+
+                        bottom-0.5
+                        left-1/2
+
+                        h-px
+
+                        -translate-x-1/2
+
+                        bg-cyan-400
+
+                        shadow-[0_0_8px_rgba(34,211,238,0.7)]
+
+                        transition-all
+                        duration-300
+
+                        ${
+                          active
+                            ? "w-5 opacity-100"
+                            : "w-0 opacity-0 group-hover:w-3 group-hover:opacity-70"
+                        }
+                      `}
+                    />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
+          {/* =================================
+              DESKTOP AUTH
+              ================================= */}
 
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden items-center gap-2 md:flex">
             {user ? (
               <>
+                {/* ADMIN */}
+
                 <Link to="/admin">
-                  <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10">
-                    Admin Dashboard
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="
+                      h-9
+
+                      rounded-md
+
+                      border-cyan-400/20
+
+                      bg-cyan-400/[0.03]
+
+                      px-3
+
+                      font-mono
+                      text-[9px]
+                      uppercase
+                      tracking-wider
+
+                      text-cyan-300
+
+                      transition-all
+                      duration-300
+
+                      hover:border-cyan-400/40
+                      hover:bg-cyan-400/[0.08]
+                      hover:text-cyan-200
+                    "
+                  >
+                    <ShieldCheck className="mr-2 h-3.5 w-3.5" />
+
+                    Admin
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+
+                {/* SIGN OUT */}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="
+                    h-9
+                    px-3
+
+                    font-mono
+                    text-[9px]
+                    uppercase
+                    tracking-wider
+
+                    text-white/35
+
+                    hover:bg-white/[0.04]
+                    hover:text-white/80
+                  "
+                >
                   Sign Out
                 </Button>
               </>
             ) : (
+              /* ADMIN LOGIN */
+
               <Link to="/login">
-                <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="
+                    h-9
+
+                    rounded-md
+
+                    border-cyan-400/25
+
+                    bg-cyan-400/[0.04]
+
+                    px-4
+
+                    font-mono
+                    text-[9px]
+                    uppercase
+                    tracking-wider
+
+                    text-cyan-300
+
+                    transition-all
+                    duration-300
+
+                    hover:border-cyan-400/50
+                    hover:bg-cyan-400/[0.08]
+                    hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]
+                  "
+                >
                   Admin Login
                 </Button>
               </Link>
             )}
           </div>
 
+          {/* =================================
+              MOBILE MENU BUTTON
+              ================================= */}
+
           <div className="md:hidden">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() =>
+                setIsMobileMenuOpen((prev) => !prev)
+              }
+              className="
+                h-10
+                w-10
+
+                rounded-md
+
+                border
+                border-white/[0.08]
+
+                bg-white/[0.03]
+
+                p-0
+
+                text-white/70
+
+                hover:border-cyan-400/30
+                hover:bg-cyan-400/[0.05]
+                hover:text-cyan-300
+              "
+              aria-label={
+                isMobileMenuOpen
+                  ? "Close navigation menu"
+                  : "Open navigation menu"
+              }
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
 
-        {isMobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-background/95 backdrop-blur-md rounded-lg mt-2 border border-border">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="text-foreground/80 hover:text-primary-glow block px-3 py-2 text-base font-medium transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              <div className="px-3 py-2 space-y-2">
-                {user ? (
-                  <>
-                    <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
-                        Admin Dashboard
-                      </Button>
-                    </Link>
-                    <Button variant="ghost" size="sm" className="w-full" onClick={handleSignOut}>
-                      Sign Out
-                    </Button>
-                  </>
-                ) : (
-                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
-                      Admin Login
+        {/* =====================================
+            MOBILE MENU
+            ===================================== */}
+
+        <div
+          className={`
+            overflow-hidden
+
+            transition-all
+            duration-500
+
+            md:hidden
+
+            ${
+              isMobileMenuOpen
+                ? "max-h-[500px] pb-4 opacity-100"
+                : "max-h-0 opacity-0"
+            }
+          `}
+        >
+          <div
+            className="
+              rounded-xl
+
+              border
+              border-white/[0.08]
+
+              bg-[#080b10]/95
+
+              p-3
+
+              shadow-[0_20px_50px_rgba(0,0,0,0.4)]
+
+              backdrop-blur-xl
+            "
+          >
+            {/* MOBILE SYSTEM HEADER */}
+
+            <div
+              className="
+                mb-2
+
+                flex
+                items-center
+                justify-between
+
+                border-b
+                border-white/[0.06]
+
+                px-3
+                pb-3
+              "
+            >
+              <span
+                className="
+                  font-mono
+                  text-[9px]
+                  uppercase
+                  tracking-[0.18em]
+                  text-white/30
+                "
+              >
+                NAVIGATION_MODULE
+              </span>
+
+              <span
+                className="
+                  flex
+                  items-center
+                  gap-1.5
+
+                  font-mono
+                  text-[8px]
+                  uppercase
+                  tracking-wider
+
+                  text-emerald-400/60
+                "
+              >
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+
+                    rounded-full
+
+                    bg-emerald-400
+                  "
+                />
+
+                ONLINE
+              </span>
+            </div>
+
+            {/* MOBILE LINKS */}
+
+            <div className="space-y-1">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    onClick={() =>
+                      setIsMobileMenuOpen(false)
+                    }
+                    className={`
+                      flex
+                      items-center
+                      justify-between
+
+                      rounded-md
+
+                      px-3
+                      py-3
+
+                      font-mono
+                      text-xs
+                      uppercase
+                      tracking-wider
+
+                      transition-all
+                      duration-300
+
+                      ${
+                        active
+                          ? "bg-cyan-400/[0.08] text-cyan-300"
+                          : "text-white/50 hover:bg-white/[0.04] hover:text-white"
+                      }
+                    `}
+                  >
+                    <span>{link.name}</span>
+
+                    {active && (
+                      <span
+                        className="
+                          h-1.5
+                          w-1.5
+
+                          rounded-full
+
+                          bg-cyan-400
+
+                          shadow-[0_0_8px_rgba(34,211,238,0.8)]
+                        "
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* MOBILE AUTH */}
+
+            <div
+              className="
+                mt-3
+
+                border-t
+                border-white/[0.06]
+
+                pt-3
+              "
+            >
+              {user ? (
+                <div className="space-y-2">
+                  <Link
+                    to="/admin"
+                    onClick={() =>
+                      setIsMobileMenuOpen(false)
+                    }
+                  >
+                    <Button
+                      variant="outline"
+                      className="
+                        w-full
+                        justify-center
+
+                        border-cyan-400/20
+
+                        bg-cyan-400/[0.03]
+
+                        font-mono
+                        text-[10px]
+                        uppercase
+                        tracking-wider
+
+                        text-cyan-300
+
+                        hover:border-cyan-400/40
+                        hover:bg-cyan-400/[0.08]
+                      "
+                    >
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+
+                      Admin Dashboard
                     </Button>
                   </Link>
-                )}
-              </div>
+
+                  <Button
+                    variant="ghost"
+                    onClick={handleSignOut}
+                    className="
+                      w-full
+
+                      font-mono
+                      text-[10px]
+                      uppercase
+                      tracking-wider
+
+                      text-white/40
+
+                      hover:bg-white/[0.04]
+                      hover:text-white
+                    "
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() =>
+                    setIsMobileMenuOpen(false)
+                  }
+                >
+                  <Button
+                    variant="outline"
+                    className="
+                      w-full
+
+                      border-cyan-400/20
+
+                      bg-cyan-400/[0.03]
+
+                      font-mono
+                      text-[10px]
+                      uppercase
+                      tracking-wider
+
+                      text-cyan-300
+
+                      hover:border-cyan-400/40
+                      hover:bg-cyan-400/[0.08]
+                    "
+                  >
+                    Admin Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );

@@ -1,29 +1,63 @@
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
+
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import EventsPreview from "@/components/EventsPreview";
+import AchievementsSection from "@/components/AchievementsSection";
+import GallerySection from "@/components/GallerySection";
 import Footer from "@/components/Footer";
+
 
 const Index = () => {
   return (
     <>
       <Helmet>
-        <title>ITESA - DYPCOE</title>
-        <meta 
-          name="description" 
-          content="Welcome to the official website of ITESA, the premier technology and innovation student association at DYPCOE, Pune. Find our latest events, meet the team, and get involved." 
+        <title>
+          ITESA - D.Y. Patil College of Engineering
+        </title>
+
+        <meta
+          name="description"
+          content="Information Technology Engineering Students' Association"
         />
-        <meta property="og:title" content="ITESA - Official Tech Club of DYPCOE" />
-        <meta property="og:description" content="Find our latest events, meet the team, and get involved with the premier tech club at DYPCOE." />
-        <meta property="og:image" content="https://bhephgetoquqyffcbxgt.supabase.co/storage/v1/object/public/images/logo.webp" />
-        <meta property="og:url" content="https://itesa-dypcoe.vercel.app/" /> 
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-black text-white">
+
         <Navbar />
-        <HeroSection />
-        <EventsPreview />
-        <Footer />
+
+        <main>
+
+          {/* HERO */}
+          <section id="hero">
+            <HeroSection />
+          </section>
+
+          {/* EVENTS */}
+          <section id="events">
+            <EventsPreview />
+          </section>
+
+          {/* ACHIEVEMENTS */}
+          <section id="achievements">
+            <AchievementsSection />
+          </section>
+
+          {/* GALLERY */}
+          <section id="gallery">
+            <GallerySection />
+          </section>
+
+        </main>
+
+        {/* FOOTER */}
+        <section id="footer">
+          <Footer />
+        </section>
+
+        {/* GLOBAL NEX */}
+        
+
       </div>
     </>
   );

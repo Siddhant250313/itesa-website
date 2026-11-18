@@ -1,244 +1,853 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+import CyberBackground from "@/components/CyberBackground";
+import ThreeDTest from "@/components/3d/ThreeDTest";
+import NexScene from "./3d/NexScene";
+import NexVoice from "@/components/NexVoice";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
-  const [animationClass, setAnimationClass] = useState('');
-  const [typedSuffix, setTypedSuffix] = useState('');
-  const [suffixIndex, setSuffixIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopStarted, setLoopStarted] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
 
-  const basePhrase = "10 Years of ";
-  const suffixes = [
-    "Innovations",
-    "Growth",
-    "Learning",
-    "Impact"
-  ];
+  // Nex dialogue state
+  const [showNexDialogue, setShowNexDialogue] = useState(false);
 
-  useEffect(() => {
-    const hasPlayed = sessionStorage.getItem('animationHasPlayed');
-    if (hasPlayed) {
-      setAnimationClass('animate-immediately');
-      setLoopStarted(true);
-    } else {
-      const timer = setTimeout(() => {
-        setAnimationClass('animate');
-        sessionStorage.setItem('animationHasPlayed', 'true');
-        setTimeout(() => setLoopStarted(true), 2800);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
+  useLayoutEffect(() => {
+    const hero = heroRef.current;
+    const content = contentRef.current;
+
+    if (!hero || !content) return;
+
+    const ctx = gsap.context(() => {
+      const intro = gsap.timeline({
+        defaults: {
+          ease: "power3.out",
+        },
+      });
+
+      intro.from(statusRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.7,
+      });
+
+      intro.from(
+        titleRef.current,
+        {
+          opacity: 0,
+          y: 40,
+          scale: 0.97,
+          duration: 0.9,
+        },
+        "-=0.3"
+      );
+
+      intro.from(
+        buttonsRef.current,
+        {
+          opacity: 0,
+          y: 25,
+          duration: 0.7,
+        },
+        "-=0.3"
+      );
+
+      intro.from(
+        statsRef.current,
+        {
+          opacity: 0,
+          y: 20,
+          duration: 0.6,
+        },
+        "-=0.4"
+      );
+
+      gsap.to(content, {
+        y: -180,
+        opacity: 0,
+        scale: 0.96,
+        ease: "none",
+
+        scrollTrigger: {
+          trigger: hero,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }, hero);
+
+    return () => ctx.revert();
   }, []);
 
-  // --- THIS IS THE CORRECTED LOGIC FOR THE LOOP ---
-  useEffect(() => {
-    if (!loopStarted) return;
-
-    const currentSuffix = suffixes[suffixIndex];
-    let timeoutId: NodeJS.Timeout;
-
-    if (isDeleting) {
-      // Handle deleting
-      if (typedSuffix.length > 0) {
-        timeoutId = setTimeout(() => {
-          setTypedSuffix(currentSuffix.substring(0, typedSuffix.length - 1));
-        }, 80); // Deleting speed
-      } else {
-        setIsDeleting(false);
-        setSuffixIndex((prevIndex) => (prevIndex + 1) % suffixes.length);
-      }
-    } else {
-      // Handle typing
-      if (typedSuffix.length < currentSuffix.length) {
-        timeoutId = setTimeout(() => {
-          setTypedSuffix(currentSuffix.substring(0, typedSuffix.length + 1));
-        }, 120); // Typing speed
-      } else {
-        // Pause at the end of the word
-        timeoutId = setTimeout(() => {
-          setIsDeleting(true);
-        }, 2000); // Pause duration
-      }
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [typedSuffix, isDeleting, suffixIndex, loopStarted, suffixes]);
-
   return (
-    <>
-      <style>{`
-        /* Keyframes for the typing animation */
-        @keyframes typing {
-          from { width: 0; }
-          to { width: 100%; }
-        }
+    <section
+      ref={heroRef}
+      className="
+        relative
+        min-h-screen
+        flex
+        items-center
+        justify-center
+        overflow-hidden
+        bg-[#030508]
+      "
+    >
+      {/* =====================================================
+          CYBER BACKGROUND
+      ====================================================== */}
+      <div className="absolute inset-0 z-0">
+        <CyberBackground />
+      </div>
 
-        /* Keyframes for blinking cursor */
-        @keyframes blink-caret {
-          from, to { border-color: transparent; }
-          50% { border-color: hsl(var(--primary)); }
-        }
+      {/* =====================================================
+          3D SPHERE
+      ====================================================== */}
+      <div className="absolute inset-0 z-[1] pointer-events-none">
+        <ThreeDTest />
+      </div>
 
-        /* Base class for a typewriter line */
-        .typewriter {
-          display: inline-block;
-          overflow: hidden;
-          white-space: nowrap;
-          width: 0;
-          padding-bottom: 0.2em;
-          margin-bottom: -0.1em;
-        }
-        
-        .animate .typewriter-1 {
-          animation: typing 1.2s steps(22, end) forwards;
-        }
+      {/* =====================================================
+          STATIC NEX
+          LEFT BOTTOM
+      ====================================================== */}
+      <div
+        onClick={() => setShowNexDialogue((prev) => !prev)}
+        className="
+          absolute
+          left-4
+          sm:left-8
+          bottom-4
+          sm:bottom-6
+          z-[50]
 
-        .animate .typewriter-2 {
-          animation: typing 0.6s steps(11, end) forwards;
-          animation-delay: 1.2s;
-        }
-        
-        .animate .typewriter-3 {
-          animation: typing 1.0s steps(19, end) forwards;
-          animation-delay: 1.8s;
-        }
+          w-[180px]
+          h-[180px]
 
-        /* Fade-in for content below the title */
-        .fade-in-content {
-          opacity: 0;
-          transition: opacity 1s ease-in;
-        }
-        
-        .animate .fade-in-content {
-          opacity: 1;
-          transition-delay: 2.8s;
-        }
+          sm:w-[220px]
+          sm:h-[220px]
 
-        .animate-immediately .typewriter {
-          width: 100%;
-        }
-        .animate-immediately .fade-in-content {
-          opacity: 1;
-        }
-        
-        .slogan-container {
-            min-height: 2.5em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Righteous', sans-serif; /* Use the new font */
-            font-size: 1.8rem; /* Made it a bit larger for projectors */
-            letter-spacing: 0.05em; /* Added letter spacing for style */
-            color: hsl(var(--foreground, 0 0% 95%) / 0.9);
-        }
-        .typewriter-cursor {
-            border-right: 3px solid hsl(var(--primary));
-            animation: blink-caret 0.75s step-end infinite;
-            padding-right: 2px;
-        }
+          cursor-pointer
+        "
+        title="Talk to Nex"
+      >
+        <NexScene />
+      </div>
 
-        .bg-gradient-primary {
-            background: var(--gradient-primary, linear-gradient(135deg, #3a7bfd, #6b4aff));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .bg-gradient-button {
-           background: var(--gradient-button, linear-gradient(135deg, #4d8aff, #6b4aff));
-        }
-        .text-foreground {
-           color: hsl(var(--foreground, 0 0% 95%));
-        }
-        .text-foreground\\/80 {
-            color: hsl(var(--foreground, 0 0% 95%) / 0.8);
-        }
-        .text-foreground\\/60 {
-            color: hsl(var(--muted-foreground, 240 5% 65%));
-        }
-        .bg-gradient-hero {
-            background: var(--gradient-hero, linear-gradient(180deg, hsl(var(--background, 240 10% 3.9%) / 0.7) 0%, hsl(var(--background, 240 10% 3.9%)) 100%));
-        }
-        .border-primary\\/30 {
-            border-color: hsl(var(--primary, 217 91% 60%) / 0.3);
-        }
-        .text-primary {
-            color: hsl(var(--primary, 217 91% 60%));
-        }
-        .hover\\:bg-primary\\/10:hover {
-            background-color: hsl(var(--primary, 217 91% 60%) / 0.1);
-        }
-        .hover\\:border-primary:hover {
-            border-color: hsl(var(--primary, 217 91% 60%));
-        }
-        .hover\\:shadow-glow:hover {
-            box-shadow: var(--shadow-glow, 0 0 40px hsl(217 91% 60% / 0.3));
-        }
-      `}</style>
+      {/* =====================================================
+          NEX DIALOGUE
+      ====================================================== */}
+      {showNexDialogue && (
+        <div
+          className="
+            absolute
 
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-background">
-        
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://bhephgetoquqyffcbxgt.supabase.co/storage/v1/object/public/images/College-Photo.194c9769.jpg"
-            alt="ITESA Technology Innovation" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-hero opacity-85" />
-        </div>
-        
-        <div className={`relative z-20 text-center max-w-4xl mt-24 px-4 sm:px-6 lg:px-8 pointer-events-none ${animationClass}`}>
-          <h1 className="text-3xl sm:text-6xl md:text-7xl font-bold mb-6 leading-tight flex flex-col items-center">
-            <span className="typewriter typewriter-1 block bg-gradient-primary">Information Technology</span>
-            <span className="typewriter typewriter-2 block text-foreground">Engineering</span>
-            <span className="typewriter typewriter-3 block bg-gradient-primary">Student Association</span>
-          </h1>
-          
-          <div className="fade-in-content">
-            <div className="slogan-container text-lg sm:text-xl md:text-2xl mb-8 max-w-2xl mx-auto leading-relaxed">
-              <span className='mr-2'>{basePhrase}</span>
-              <span className="typewriter-cursor text-primary">{typedSuffix}</span>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pointer-events-auto">
-              <Link to="/events">
-                <Button size="lg" className="bg-gradient-button hover:shadow-glow transition-all duration-300 transform hover:scale-105 text-lg px-8 py-3 rounded-lg text-white font-semibold">
-                  Explore Events
-                  <ArrowRight className="ml-2 h-5 w-5 inline" />
-                </Button>
-              </Link>
-              <Link to="https://www.instagram.com/itesa.dyp/">
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-300 text-lg px-8 py-3 rounded-lg font-semibold"
+            left-[155px]
+            bottom-[145px]
+
+            sm:left-[190px]
+            sm:bottom-[175px]
+
+            z-[60]
+
+            pointer-events-none
+
+            animate-in
+            fade-in
+            slide-in-from-left-2
+            duration-300
+          "
+        >
+          <div
+            className="
+              relative
+
+              w-[190px]
+              sm:w-[220px]
+
+              rounded-xl
+
+              border
+              border-cyan-400/30
+
+              bg-black/80
+
+              backdrop-blur-md
+
+              px-4
+              py-3
+
+              shadow-[0_0_25px_rgba(34,211,238,0.18)]
+            "
+          >
+            {/* ONLINE INDICATOR */}
+            <div className="flex items-center gap-2 mb-1.5">
+              <span
+                className="
+                  w-1.5
+                  h-1.5
+                  rounded-full
+                  bg-cyan-400
+
+                  shadow-[0_0_8px_#22d3ee]
+                "
+              />
+
+              <span
+                className="
+                  font-mono
+                  text-[8px]
+                  tracking-[0.2em]
+                  text-cyan-300
+                  uppercase
+                "
               >
-                Watch Demo
-                <Play className="ml-2 h-5 w-5 inline" />
-              </Button>
-              </Link>
+                NEX • ONLINE
+              </span>
             </div>
 
-            <div className="my-5 grid grid-cols-3 sm:grid-cols-3 sm:gap-8 pt-8">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-primary">100+</div>
-                <div className="text-xs sm:text-sm text-foreground/60 uppercase tracking-wider">Active Members</div>
+            {/* MESSAGE */}
+            <p
+              className="
+                font-mono
+                text-[11px]
+                sm:text-xs
+                leading-relaxed
+                text-white/90
+              "
+            >
+              Hey, I am Nex 👋
+              <br />
+
+              <span className="text-cyan-300">
+                Welcome to ITESA!
+              </span>
+            </p>
+
+            {/* SPEECH BUBBLE TAIL */}
+            <div
+              className="
+                absolute
+                -bottom-2
+                left-7
+
+                w-4
+                h-4
+
+                rotate-45
+
+                bg-black/80
+
+                border-r
+                border-b
+                border-cyan-400/30
+              "
+            />
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          NEX VOICE
+      ====================================================== */}
+      <NexVoice />
+
+      {/* =====================================================
+          MAIN HERO CONTENT
+      ====================================================== */}
+      <div
+        ref={contentRef}
+        className="
+          relative
+          z-40
+
+          w-full
+          max-w-6xl
+
+          mx-auto
+
+          px-6
+          sm:px-8
+          lg:px-12
+
+          pt-28
+          pb-20
+        "
+      >
+        <div
+          className="
+            max-w-4xl
+            mx-auto
+            text-center
+          "
+        >
+          {/* =================================================
+              STATUS
+          ================================================= */}
+          <div
+            ref={statusRef}
+            className="
+              inline-flex
+              items-center
+              gap-3
+
+              px-4
+              py-2
+
+              mb-8
+
+              rounded-full
+
+              border
+              border-cyan-400/20
+
+              bg-black/30
+
+              backdrop-blur-md
+
+              font-mono
+              text-xs
+              sm:text-sm
+
+              text-cyan-300
+            "
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className="
+                  absolute
+                  inline-flex
+                  h-full
+                  w-full
+                  rounded-full
+                  bg-cyan-400
+                  opacity-75
+                  animate-ping
+                "
+              />
+
+              <span
+                className="
+                  relative
+                  inline-flex
+                  h-2
+                  w-2
+                  rounded-full
+                  bg-cyan-400
+                "
+              />
+            </span>
+
+            <span>SYSTEM INITIALIZED</span>
+
+            <span className="text-white/30">
+              |
+            </span>
+
+            <span className="text-emerald-400">
+              ONLINE
+            </span>
+          </div>
+
+          {/* =================================================
+              TITLE
+          ================================================= */}
+          <div
+            ref={titleRef}
+            className="relative z-50"
+          >
+            {/* ITESA */}
+            <h1
+              className="
+                text-5xl
+                sm:text-6xl
+                md:text-7xl
+                lg:text-8xl
+
+                font-black
+
+                tracking-tight
+                leading-none
+              "
+            >
+              <span
+                className="
+                  text-white
+
+                  drop-shadow-[0_0_30px_rgba(255,255,255,0.08)]
+                "
+              >
+                ITESA
+              </span>
+            </h1>
+
+            {/* =================================================
+                FULL FORM
+            ================================================= */}
+            <div
+              className="
+                mt-4
+
+                inline-flex
+                items-center
+                justify-center
+
+                max-w-full
+
+                px-5
+                py-2
+
+                rounded-md
+
+                border
+                border-cyan-400/30
+
+                bg-cyan-400/[0.06]
+
+                backdrop-blur-sm
+
+                shadow-[0_0_25px_rgba(34,211,238,0.10)]
+              "
+            >
+              <span
+                className="
+                  font-mono
+
+                  text-[11px]
+                  sm:text-xs
+                  md:text-sm
+                  lg:text-base
+
+                  font-semibold
+
+                  tracking-[0.10em]
+
+                  uppercase
+
+                  text-cyan-300
+
+                  drop-shadow-[0_0_10px_rgba(34,211,238,0.35)]
+                "
+              >
+                Information Technology Student Association
+              </span>
+            </div>
+
+            {/* =================================================
+                AI × CYBERSECURITY
+            ================================================= */}
+            <div
+              className="
+                mt-5
+
+                flex
+                items-center
+                justify-center
+
+                gap-4
+              "
+            >
+              <span
+                className="
+                  font-mono
+
+                  text-sm
+                  sm:text-base
+                  md:text-lg
+
+                  font-bold
+
+                  tracking-[0.25em]
+
+                  uppercase
+
+                  text-cyan-300
+
+                  drop-shadow-[0_0_12px_rgba(34,211,238,0.55)]
+                "
+              >
+                AI
+              </span>
+
+              <span
+                className="
+                  text-lg
+                  md:text-xl
+
+                  font-light
+
+                  text-white/50
+                "
+              >
+                ×
+              </span>
+
+              <span
+                className="
+                  font-mono
+
+                  text-sm
+                  sm:text-base
+                  md:text-lg
+
+                  font-bold
+
+                  tracking-[0.20em]
+
+                  uppercase
+
+                  text-emerald-300
+
+                  drop-shadow-[0_0_12px_rgba(52,211,153,0.55)]
+                "
+              >
+                Cybersecurity
+              </span>
+            </div>
+          </div>
+
+          {/* =================================================
+              BUTTONS
+          ================================================= */}
+          <div
+            ref={buttonsRef}
+            className="
+              relative
+              z-50
+
+              flex
+              flex-col
+              sm:flex-row
+
+              items-center
+              justify-center
+
+              gap-4
+
+              mt-10
+            "
+          >
+            {/* ENTER ITESA */}
+            <Link to="/events">
+              <Button
+                size="lg"
+                className="
+                  group
+
+                  h-12
+                  px-7
+
+                  rounded-md
+
+                  bg-cyan-400
+                  text-black
+
+                  font-semibold
+
+                  hover:bg-cyan-300
+
+                  hover:shadow-[0_0_30px_rgba(34,211,238,0.35)]
+
+                  transition-all
+                  duration-300
+                "
+              >
+                ENTER ITESA
+
+                <ArrowRight
+                  className="
+                    ml-2
+                    h-5
+                    w-5
+
+                    transition-transform
+                    duration-300
+
+                    group-hover:translate-x-1
+                  "
+                />
+              </Button>
+            </Link>
+
+            {/* EXPLORE EVENTS */}
+            <Link to="/events">
+              <Button
+                variant="outline"
+                size="lg"
+                className="
+                  h-12
+                  px-7
+
+                  rounded-md
+
+                  border-white/15
+
+                  bg-white/[0.03]
+
+                  text-white/80
+
+                  backdrop-blur-sm
+
+                  hover:border-cyan-400/40
+
+                  hover:bg-cyan-400/5
+
+                  hover:text-cyan-300
+
+                  transition-all
+                  duration-300
+                "
+              >
+                EXPLORE EVENTS
+              </Button>
+            </Link>
+          </div>
+
+          {/* =================================================
+              STATS
+          ================================================= */}
+          <div
+            ref={statsRef}
+            className="
+              relative
+              z-50
+
+              grid
+              grid-cols-3
+
+              max-w-2xl
+
+              mx-auto
+
+              mt-14
+
+              border-y
+              border-white/10
+            "
+          >
+            {/* MEMBERS */}
+            <div
+              className="
+                py-5
+
+                border-r
+                border-white/10
+              "
+            >
+              <div
+                className="
+                  font-mono
+
+                  text-xl
+                  sm:text-2xl
+
+                  font-bold
+
+                  text-cyan-300
+                "
+              >
+                100+
               </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-primary">50+</div>
-                <div className="text-xs sm:text-sm text-foreground/60 uppercase tracking-wider">Events Organized</div>
+
+              <div
+                className="
+                  mt-1
+
+                  text-[10px]
+                  sm:text-xs
+
+                  uppercase
+
+                  tracking-wider
+
+                  text-white/35
+                "
+              >
+                Members
               </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-primary">25+</div>
-                <div className="text-xs sm:text-sm text-foreground/60 uppercase tracking-wider">Projects Completed</div>
+            </div>
+
+            {/* EVENTS */}
+            <div
+              className="
+                py-5
+
+                border-r
+                border-white/10
+              "
+            >
+              <div
+                className="
+                  font-mono
+
+                  text-xl
+                  sm:text-2xl
+
+                  font-bold
+
+                  text-cyan-300
+                "
+              >
+                50+
+              </div>
+
+              <div
+                className="
+                  mt-1
+
+                  text-[10px]
+                  sm:text-xs
+
+                  uppercase
+
+                  tracking-wider
+
+                  text-white/35
+                "
+              >
+                Events
+              </div>
+            </div>
+
+            {/* YEARS */}
+            <div className="py-5">
+              <div
+                className="
+                  font-mono
+
+                  text-xl
+                  sm:text-2xl
+
+                  font-bold
+
+                  text-emerald-400
+                "
+              >
+                10+
+              </div>
+
+              <div
+                className="
+                  mt-1
+
+                  text-[10px]
+                  sm:text-xs
+
+                  uppercase
+
+                  tracking-wider
+
+                  text-white/35
+                "
+              >
+                Years
               </div>
             </div>
           </div>
+
+          {/* =================================================
+              FOOTER STATUS
+          ================================================= */}
+          <div
+            className="
+              relative
+              z-50
+
+              mt-7
+
+              font-mono
+
+              text-[10px]
+              sm:text-xs
+
+              text-white/20
+
+              tracking-wider
+            "
+          >
+            CONNECTION_SECURE // ITESA_CORE // 0x7F
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* =====================================================
+          BOTTOM FADE
+      ====================================================== */}
+      <div
+        className="
+          absolute
+          bottom-0
+          left-0
+          right-0
+
+          h-32
+
+          bg-gradient-to-t
+          from-[#030508]
+          to-transparent
+
+          z-[60]
+
+          pointer-events-none
+        "
+      />
+
+      {/* =====================================================
+          SCROLL INDICATOR
+      ====================================================== */}
+      <div
+        className="
+          absolute
+
+          bottom-7
+          left-1/2
+
+          -translate-x-1/2
+
+          z-[70]
+
+          hidden
+          sm:flex
+
+          flex-col
+          items-center
+
+          gap-2
+
+          text-[9px]
+
+          font-mono
+
+          tracking-[0.3em]
+
+          text-white/25
+        "
+      >
+        <span>SCROLL</span>
+
+        <div
+          className="
+            w-px
+            h-8
+
+            bg-gradient-to-b
+            from-cyan-400/60
+            to-transparent
+          "
+        />
+      </div>
+    </section>
   );
 };
 
