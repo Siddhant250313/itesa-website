@@ -123,27 +123,27 @@ const HeroSection = () => {
           LEFT BOTTOM
       ====================================================== */}
       <div
-        onClick={() => setShowNexDialogue((prev) => !prev)}
-        className="
-          absolute
-          left-4
-          sm:left-8
-          bottom-4
-          sm:bottom-6
-          z-[50]
+  onClick={() => setShowNexDialogue((prev) => !prev)}
+  className="
+    absolute
+    left-2
+    bottom-2
+    z-[50]
 
-          w-[180px]
-          h-[180px]
+    w-[105px]
+    h-[105px]
 
-          sm:w-[220px]
-          sm:h-[220px]
+    sm:left-8
+    sm:bottom-6
+    sm:w-[220px]
+    sm:h-[220px]
 
-          cursor-pointer
-        "
-        title="Talk to Nex"
-      >
-        <NexScene />
-      </div>
+    cursor-pointer
+  "
+  title="Talk to Nex"
+>
+  <NexScene />
+</div>
 
       {/* =====================================================
           NEX DIALOGUE
@@ -153,8 +153,8 @@ const HeroSection = () => {
           className="
             absolute
 
-            left-[155px]
-            bottom-[145px]
+            left-[95px]
+            bottom-[95px]
 
             sm:left-[190px]
             sm:bottom-[175px]

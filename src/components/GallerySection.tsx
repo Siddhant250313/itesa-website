@@ -79,8 +79,9 @@ const GallerySection = () => {
           ease: "power3.out",
           scrollTrigger: {
             trigger: headerRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
+            start: "top 95%",
+            toggleActions: "play none none none",
+            once: true,
           },
         });
       }
@@ -119,6 +120,9 @@ const GallerySection = () => {
         });
       }
     }, section);
+    requestAnimationFrame(() => {
+  ScrollTrigger.refresh();
+});
 
     return () => {
       ctx.revert();
@@ -264,6 +268,8 @@ const GallerySection = () => {
                   gallery-item
                   group
                   relative
+                  min-h-[240px]
+                  sm:min-h-[280px]
                   overflow-hidden
                   rounded-xl
                   border

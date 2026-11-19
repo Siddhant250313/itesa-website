@@ -98,8 +98,9 @@ const EventsPreview = () => {
         ease: "power3.out",
         scrollTrigger: {
           trigger: section,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
+          start: "top 95%",
+         toggleActions: "play none none none",
+         once: true,
         },
       });
 
@@ -131,6 +132,9 @@ const EventsPreview = () => {
         },
       });
     }, section);
+    requestAnimationFrame(() => {
+  ScrollTrigger.refresh();
+});
 
     return () => {
       ctx.revert();
