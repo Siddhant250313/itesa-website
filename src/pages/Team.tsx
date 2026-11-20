@@ -16,7 +16,7 @@ const team = [
   {
     name: "Shambhuraj Mulik",
     role: "President",
-    image: "/team/shambhuraj-mulik.jpg",
+    image: "/team/shambhuraj-mulik.jpeg",
   },
 
   /* ========================================================
@@ -64,13 +64,13 @@ const team = [
   {
     name: "Prem Dhavale",
     role: "Design Lead",
-    image: "/team/prem-dhavale.jpg",
+    image: "/team/prem-dhavale.jpeg",
   },
 
   {
     name: "Mugdha Mane",
     role: "Design Lead",
-    image: "/team/mugdha-mane.jpg",
+    image: "/team/mugdha-mane.jpeg",
   },
 
   /* ========================================================
@@ -143,6 +143,12 @@ const team = [
     image: "/team/darshan-chaudhari.jpg",
   },
 
+  {
+    name: "Samihan Acharya",
+    role: "Cultural Lead",
+    image: "/team/samihanacharya.jpeg",
+  },
+
   /* ========================================================
      SPORTS
      ======================================================== */
@@ -159,6 +165,12 @@ const team = [
     image: "/team/harish-bhoyane.jpg",
   },
 
+  {
+    name: "Soham Khilare",
+    role: "Sports Lead",
+    image: "/team/sohamkhilare.jpeg",
+  },
+
   /* ========================================================
      DOCUMENTATION
      ======================================================== */
@@ -166,7 +178,7 @@ const team = [
   {
     name: "Arya Nikam",
     role: "Documentation Lead",
-    image: "/team/arya-nikam.jpg",
+    image: "/team/arya-nikam.jpeg",
   },
 ];
 
@@ -458,7 +470,7 @@ const OurTeam = () => {
                     rounded-xl
                     border
                     border-white/10
-                    bg-black/20
+                    bg-[#080b10]
                     backdrop-blur-md
 
                     transition-all
@@ -473,10 +485,13 @@ const OurTeam = () => {
                   <img
                     src={member.image}
                     alt={`${member.name} - ${member.role}`}
+                    loading="lazy"
+                    decoding="async"
                     className="
                       h-full
                       w-full
-                      object-cover
+                      object-contain
+                      object-center
 
                       grayscale
                       opacity-75
@@ -720,7 +735,7 @@ const OurTeam = () => {
         }
 
         .animate-team-slide {
-          animation: team-slide 65s linear infinite;
+          animation: team-slide 100s linear infinite;
           will-change: transform;
         }
       `}</style>
